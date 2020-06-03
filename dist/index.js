@@ -446,6 +446,7 @@ const commitFiles = async () => {
   const gitBranch = githubAction.getInput("branch");
   const debug = githubAction.getInput("debug");
 
+  if (debug) console.log(`Checking out to '${gitBranch}'`)
   if (debug) console.log(`Working directory: ${await cmdExecutor.pwd()}`);
   if (debug) console.log(`Current directory tree: ${await cmdExecutor.ls("-la")}`);
   if (debug) console.log(
@@ -455,7 +456,6 @@ const commitFiles = async () => {
   );
 
   if (gitBranch) {
-    if (debug) console.log(`Checking out to '${gitBranch}'`)
     await gitClient.fetch();
     await gitClient.checkout(`origin/${gitBranch}`);
   }
