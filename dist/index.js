@@ -440,8 +440,8 @@ const githubAction = __webpack_require__(470);
 
 const commitFiles = async () => {
   const activeChanges = await hasActiveChanges();
-  const commitMessage = await core.getInput("commit_message");
-  const gitBranch = await core.getInput("branch");
+  const commitMessage = await githubAction.getInput("commit_message");
+  const gitBranch = await githubAction.getInput("branch");
 
   if (gitBranch) await gitClient.checkout(gitBranch);
 
