@@ -1,1 +1,1 @@
-const lib = require('./lib')
+require('./lib').commitFiles();
