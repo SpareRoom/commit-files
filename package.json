@@ -24,7 +24,7 @@
   "homepage": "https://github.com/SpareRoom/commit-files#readme",
   "dependencies": {
     "@actions/core": "^1.2.4",
-    "simple-git": "^2.5.0"
+    "cmd-executor": "^1.1.1"
   },
   "devDependencies": {
     "@zeit/ncc": "^0.22.3",
