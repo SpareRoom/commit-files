@@ -442,10 +442,15 @@ const commitFiles = async () => {
   const activeChanges = await hasActiveChanges();
   const commitMessage = await githubAction.getInput("commit_message");
   const gitBranch = await githubAction.getInput("branch");
+  const debug = await githubAction.getInput("debug");
 
   if (gitBranch) await gitClient.checkout(gitBranch);
 
+  if (debug) console.log(`Current branch: ${gitClient.branch()}`)
+
   if (activeChanges) {
+    if (debug) console.log(`Directory tree: ${gitClient.branch()}`);
+
     if (!(await hasActiveChanges(1))) await gitClient.add("-A"); // Add all unstaged files if the changes aren't staged
 
     await gitClient.commit(`-m ${commitMessage}`);

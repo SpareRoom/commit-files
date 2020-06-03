@@ -22,6 +22,9 @@ inputs:
     description: Email address used for the commit user
     required: false
     default: actions@github.com
+  debug:
+    description: To return logs
+    required: false
 
 outputs:
   changes_commited:
