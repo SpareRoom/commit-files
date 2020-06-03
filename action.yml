@@ -1,0 +1,37 @@
+name: Commit files to git
+description: 'Commit all files changed in the workflow back to git'
+
+author: James Nixon <james.nixon@spareroom.co.uk>
+
+inputs:
+  commit_message:
+    description: Commit message against the commit
+    required: true
+  branch:
+    description: Branch to commit the file changes to
+    required: false
+    default: master
+  repository:
+    description: Pepository to commit the file changes to
+    required: false
+    default: '.'
+  commit_user_name:
+    description: Name used for the commit user
+    required: false
+    default: GitHub Actions
+  commit_user_email:
+    description: Email address used for the commit user
+    required: false
+    default: actions@github.com
+
+outputs:
+  changes_commited:
+    description: The changes in the action that were commited
+
+runs:
+  using: 'node12'
+  main: 'index.js'
+
+branding:
+  icon: 'git-commit'
+  color: orange
