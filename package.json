@@ -1,0 +1,32 @@
+{
+  "name": "commit-files",
+  "version": "1.0.0",
+  "description": "GitHub Action to Commit files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SpareRoom/commit-files.git"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "action",
+    "github"
+  ],
+  "author": "James Nixon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SpareRoom/commit-files/issues"
+  },
+  "homepage": "https://github.com/SpareRoom/commit-files#readme",
+  "dependencies": {
+    "simple-git": "^2.5.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.1.0",
+    "eslint-config-airbnb-base": "^14.1.0"
+  }
+}
