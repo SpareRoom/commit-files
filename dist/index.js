@@ -454,12 +454,16 @@ const commitFiles = async () => {
     )}`
   );
 
-  if (gitBranch) await gitClient.checkout(gitBranch);
+  if (gitBranch) {
+    if (debug) console.log(`Checking out to '${gitBranch}'`)
+    await gitClient.fetch();
+    await gitClient.checkout(`origin/${gitBranch}`);
+  }
 
   if (activeChanges) {
     if (!(await hasActiveChanges(1))) await gitClient.add("-A"); // Add all unstaged files if the changes aren't staged
 
-    await gitClient.commit(`-m ${commitMessage}`);
+    await gitClient.commit(`-a -m ${commitMessage}`);
     await gitClient.push("-u");
   } else {
     githubAction.setOutput(

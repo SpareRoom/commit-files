@@ -9,7 +9,7 @@ inputs:
     required: true
   branch:
     description: Branch to commit the file changes to
-    required: false
+    required: true
   repository:
     description: Pepository to commit the file changes to
     required: false
