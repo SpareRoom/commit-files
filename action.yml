@@ -10,7 +10,6 @@ inputs:
   branch:
     description: Branch to commit the file changes to
     required: false
-    default: master
   repository:
     description: Pepository to commit the file changes to
     required: false
