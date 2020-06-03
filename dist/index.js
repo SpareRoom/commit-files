@@ -441,16 +441,15 @@ const gitClient = cmdExecutor.git;
 
 const commitFiles = async () => {
   const activeChanges = await hasActiveChanges();
-  const commitMessage = await githubAction.getInput("commit_message");
-  const gitBranch = await githubAction.getInput("branch");
-  const debug = await githubAction.getInput("debug");
+
+  const commitMessage = githubAction.getInput("commit_message");
+  const gitBranch = githubAction.getInput("branch");
+  const debug = githubAction.getInput("debug");
 
   if (debug) console.log(`Working directory: ${await cmdExecutor.pwd()}`);
   if (debug) console.log(`Current directory tree: ${await cmdExecutor.ls("-la")}`);
 
   if (gitBranch) await gitClient.checkout(gitBranch);
-
-  if (debug) console.log(`Current branch: ${gitClient.branch()}`)
 
   if (activeChanges) {
     if (!(await hasActiveChanges(1))) await gitClient.add("-A"); // Add all unstaged files if the changes aren't staged
@@ -458,7 +457,7 @@ const commitFiles = async () => {
     await gitClient.commit(`-m ${commitMessage}`);
     await gitClient.push("-u");
   } else {
-    await githubAction.setOutput(
+    githubAction.setOutput(
       "changes_commited",
       "No changes to be commited"
     );
