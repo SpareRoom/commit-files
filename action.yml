@@ -29,8 +29,8 @@ outputs:
     description: The changes in the action that were commited
 
 runs:
-  using: 'node12'
-  main: 'index.js'
+  using: 'docker'
+  image: 'Dockerfile'
 
 branding:
   icon: 'git-commit'
