@@ -4,7 +4,7 @@
   "description": "GitHub Action to Commit files",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "ncc build index.js"
   },
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "simple-git": "^2.5.0"
   },
   "devDependencies": {
+    "@zeit/ncc": "^0.22.3",
     "eslint": "^7.1.0",
     "eslint-config-airbnb-base": "^14.1.0"
   }
