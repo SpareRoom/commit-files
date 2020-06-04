@@ -6193,47 +6193,64 @@ const github = __webpack_require__(469);
 
 const gitClient = cmdExecutor.git;
 
-const checkoutToBranch = async (branch, debug ) => {
-  if (debug) console.log(`Checking out to '${branch}'`);
+const checkoutToBranch = async (branch) => {
+  if (githubAction.isDebug()) githubAction.debug(`Checking out to '${branch}'`);
 
   await gitClient.fetch();
   await gitClient.checkout(`origin/${branch}`);
 }
 
+const getBranch = async () => {
+  const githubRef = process.env.GITHUB_REF;
+
+  if (githubRef.search(/ref\/heads\//g) == -1) {
+    return string.replace("ref/heads/", "");
+  } else {
+    throw new Error("Unable to retrieve branch name to commit to");
+  }
+}
+
 const commitFiles = async () => {
-  const activeChanges = await hasActiveChanges();
-
-  console.log(process.env)
-
   const commitMessage = githubAction.getInput("commit_message");
-  const gitBranch = githubAction.getInput("branch");
-  const debug = githubAction.getInput("debug");
+  let gitBranch;
 
-  if (debug) console.log(`Working directory: ${await cmdExecutor.pwd()}`);
-  if (debug) console.log(`Current directory tree: ${await cmdExecutor.ls("-la")}`);
-  if (debug) console.log(
-    `Current branch: ${await gitClient["rev-parse"](
-        "--abbrev-ref HEAD"
-    )}`
-  );
+  try {
+    gitBranch = await getBranch();
+  } catch (e) {
+    core.setFailed(e);
+  }
 
-  await checkoutToBranch(gitBranch, debug);
+  // Debug info to confirm it's all working correctly
+  if (githubAction.isDebug()) {
+    githubAction.debug(`Working directory: ${await cmdExecutor.pwd()}`);
+    githubAction.debug(`Current branch: ${
+      await gitClient["rev-parse"]("--abbrev-ref HEAD")
+    }`);
+  }
+
+  await checkoutToBranch(gitBranch);
+
+  const stagedChanges = await hasActiveChanges();
+  const activeChanges = await hasActiveChanges({ staged: 1 });
 
   if (activeChanges) {
-    if (!(await hasActiveChanges(1))) await gitClient.add("-A"); // Add all unstaged files if the changes aren't staged
+    if (!stagedChanges) await gitClient.add("-A"); // Add all unstaged files if the changes aren't staged
+
+    const githubToken = githubAction.getInput("github_token");
+    const githubRepo = process.env.GITHUB_REPOSITORY;
 
     await gitClient.commit(`-m ${commitMessage}`);
-    await gitClient.push("-u");
-  } else {
-    githubAction.setOutput(
-      "changes_commited",
-      "No changes to be commited"
+    await gitClient.remote(
+      `set-url origin https://x-access-token:${githubToken}@github.com/${githubRepo}.git`
     );
+    await gitClient.push(`--set-upstream origin ${gitBranch}`);
+  } else {
+    githubAction.setOutput("changes_commited", "No changes to be commited");
     return false;
   }
 }
 
-const hasActiveChanges = async (staged = 0) => {
+const hasActiveChanges = async ({ staged }) => {
   let commandArguments = '--quiet --ignore-submodules HEAD 2>/dev/null; echo $?';
 
   if (staged) commandArguments = "--cached " + commandArguments;
