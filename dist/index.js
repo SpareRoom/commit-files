@@ -6196,7 +6196,6 @@ const gitClient = cmdExecutor.git;
 const checkoutToBranch = async (branch) => {
   if (githubAction.isDebug()) githubAction.debug(`Checking out to '${branch}'`);
 
-  await gitClient.fetch();
   await gitClient.checkout(`origin/${branch}`);
 }
 
@@ -6217,6 +6216,10 @@ const commitFiles = async () => {
   const githubRepo = process.env.GITHUB_REPOSITORY;
   const gitBranch = await getBranch().catch(githubAction.setFailed);
 
+  githubAction.debug(
+    `set-url origin https://${githubUsername}:${githubToken}@github.com/${githubRepo}.git`
+  );
+
   await gitClient.remote(
     `set-url origin https://${githubUsername}:${githubToken}@github.com/${githubRepo}.git`
   ).catch(githubAction.setFailed);
@@ -6232,7 +6235,7 @@ const commitFiles = async () => {
   await checkoutToBranch(gitBranch).catch(githubAction.setFailed);
 
   const stagedChanges = await hasActiveChanges();
-  const activeChanges = await hasActiveChanges({ staged: 1 });
+  const activeChanges = await hasActiveChanges(1);
 
   if (activeChanges) {
     if (!stagedChanges) await gitClient.add("-A").catch(githubAction.setFailed); // Add all unstaged files if the changes aren't staged
@@ -6248,7 +6251,7 @@ const commitFiles = async () => {
   }
 }
 
-const hasActiveChanges = async ({ staged }) => {
+const hasActiveChanges = async (staged) => {
   let commandArguments = '--quiet --ignore-submodules HEAD 2>/dev/null; echo $?';
 
   if (staged) commandArguments = "--cached " + commandArguments;
