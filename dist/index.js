@@ -463,7 +463,7 @@ const commitFiles = async () => {
   const githubRepo = process.env.GITHUB_REPOSITORY;
   const gitBranch = await getBranch().catch(githubAction.setFailed);
 
-  githubAction.debug(
+  console.log(
     `set-url origin https://${githubUsername}:${githubToken}@github.com/${githubRepo}.git`
   );
 
@@ -487,7 +487,7 @@ const commitFiles = async () => {
 
   await gitClient.add("-A").catch(githubAction.setFailed);
 
-  await gitClient.commit(`-m ${commitMessage}`).catch(githubAction.setFailed);
+  await gitClient.commit(`-m "${commitMessage}"`).catch(githubAction.setFailed);
 
   await gitClient
     .push(`--set-upstream origin ${gitBranch}`)
