@@ -448,7 +448,7 @@ const checkoutToBranch = async (branch) => {
 
 const getBranch = async () => {
   const githubRef = process.env.GITHUB_REF;
-
+console.log(githubRef)
   if (githubRef.search(/ref\/heads\//g) != -1) {
     return githubRef.replace("ref/heads/", "");
   } else {
