@@ -6217,7 +6217,7 @@ const commitFiles = async () => {
   try {
     gitBranch = await getBranch();
   } catch (e) {
-    core.setFailed(e);
+    githubAction.setFailed(e);
   }
 
   // Debug info to confirm it's all working correctly
