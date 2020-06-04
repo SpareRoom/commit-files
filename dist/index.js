@@ -448,9 +448,9 @@ const checkoutToBranch = async (branch) => {
 
 const getBranch = async () => {
   const githubRef = process.env.GITHUB_REF;
-console.log(githubRef)
-  if (githubRef.search(/ref\/heads\//g) != -1) {
-    return githubRef.replace("ref/heads/", "");
+
+  if (githubRef.search(/refs\/heads\//g) != -1) {
+    return githubRef.replace("refs/heads/", "");
   } else {
     throw new Error("Unable to retrieve branch name to commit to");
   }
