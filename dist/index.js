@@ -484,7 +484,7 @@ const commitFiles = async () => {
   const stagedChanges = await hasActiveChanges();
   const activeChanges = await hasActiveChanges(1);
 
-  console.log(`Status command output: ${await gitClient.status()}`);
+  console.log(activeChanges, stagedChanges);
   if (activeChanges) {
     if (!stagedChanges) await gitClient.add("-A").catch(githubAction.setFailed); // Add all unstaged files if the changes aren't staged
 
