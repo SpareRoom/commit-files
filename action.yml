@@ -7,10 +7,9 @@ inputs:
   commit_message:
     description: Commit message against the commit
     required: true
-  commit_user_email:
-    description: Email address used for the commit user
+  github_username:
+    description: GitHub username to commit via
     required: true
-    default: actions@github.com
   github_token:
     description: GitHub token to authenticate the push
     required: true

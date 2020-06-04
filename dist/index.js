@@ -6213,6 +6213,7 @@ const getBranch = async () => {
 const commitFiles = async () => {
   const commitMessage = githubAction.getInput("commit_message");
   const githubToken = githubAction.getInput("github_token");
+  const githubUsername = githubAction.getInput("github_username");
   const githubRepo = process.env.GITHUB_REPOSITORY;
   let gitBranch;
 
@@ -6223,7 +6224,7 @@ const commitFiles = async () => {
   }
 
   await gitClient.remote(
-    `set-url origin https://x-access-token:${githubToken}@github.com/${githubRepo}.git`
+    `set-url origin https://${githubUsername}:${githubToken}@github.com/${githubRepo}.git`
   );
 
   // Debug info to confirm it's all working correctly
