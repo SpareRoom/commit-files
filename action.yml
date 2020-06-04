@@ -14,9 +14,6 @@ inputs:
   github_token:
     description: GitHub token to authenticate the push
     required: true
-  debug:
-    description: To return logs
-    required: false
 
 outputs:
   changes_commited:
