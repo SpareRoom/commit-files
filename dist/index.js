@@ -440,11 +440,11 @@ const githubAction = __webpack_require__(470);
 
 const gitClient = cmdExecutor.git;
 
-const checkoutToBranch = async (branch) => {
-  if (githubAction.isDebug()) githubAction.debug(`Checking out to '${branch}'`);
+// const checkoutToBranch = async (branch) => {
+//   if (githubAction.isDebug()) githubAction.debug(`Checking out to '${branch}'`);
 
-  await gitClient.checkout(`origin/${branch}`);
-}
+//   await gitClient.checkout(`origin/${branch}`);
+// }
 
 const getBranch = async () => {
   const githubRef = process.env.GITHUB_REF;
@@ -479,7 +479,7 @@ const commitFiles = async () => {
     }`);
   }
 
-  await checkoutToBranch(gitBranch).catch(githubAction.setFailed);
+  // await checkoutToBranch(gitBranch).catch(githubAction.setFailed);
 
   const stagedChanges = await hasActiveChanges();
   const activeChanges = await hasActiveChanges(1);
