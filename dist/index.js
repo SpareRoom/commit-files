@@ -6212,6 +6212,8 @@ const getBranch = async () => {
 
 const commitFiles = async () => {
   const commitMessage = githubAction.getInput("commit_message");
+  const githubToken = githubAction.getInput("github_token");
+  const githubRepo = process.env.GITHUB_REPOSITORY;
   let gitBranch;
 
   try {
@@ -6239,9 +6241,6 @@ const commitFiles = async () => {
 
   if (activeChanges) {
     if (!stagedChanges) await gitClient.add("-A"); // Add all unstaged files if the changes aren't staged
-
-    const githubToken = githubAction.getInput("github_token");
-    const githubRepo = process.env.GITHUB_REPOSITORY;
 
     await gitClient.commit(`-m ${commitMessage}`);
     await gitClient.push(`--set-upstream origin ${gitBranch}`);
