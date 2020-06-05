@@ -490,8 +490,11 @@ const commitFiles = async () => {
 
   await gitClient.add('-A').catch(githubAction.setFailed);
 
+  await gitClient.config(`--global user.name "${githubUsername}"`);
+  await gitClient.config('--global user.email "<>"');
+
   await gitClient
-    .commit(`-m "${commitMessage}" --author "${githubUsername} <>"`)
+    .commit(`-m "${commitMessage}"`)
     .catch(githubAction.setFailed);
 
   await gitClient
