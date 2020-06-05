@@ -474,7 +474,6 @@ const commitFiles = async () => {
 
   // Debug info to confirm it's all working correctly
   if (githubAction.isDebug()) {
-    githubAction.debug(`Working directory: ${await cmdExecutor.pwd()}`);
     githubAction.debug(`Current branch: ${
       await gitClient['rev-parse']('--abbrev-ref HEAD')
     }`);
