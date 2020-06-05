@@ -440,12 +440,6 @@ const githubAction = __webpack_require__(470);
 
 const gitClient = cmdExecutor.git;
 
-// const checkoutToBranch = async (branch) => {
-//   if (githubAction.isDebug()) githubAction.debug(`Checking out to '${branch}'`);
-
-//   await gitClient.checkout(`origin/${branch}`);
-// }
-
 // const hasActiveChanges = async (staged) => {
 //   let commandArguments = '--quiet --ignore-submodules HEAD 2>/dev/null; echo $?';
 
@@ -485,8 +479,6 @@ const commitFiles = async () => {
       await gitClient['rev-parse']('--abbrev-ref HEAD')
     }`);
   }
-
-  // await checkoutToBranch(gitBranch).catch(githubAction.setFailed);
 
   await gitClient.add('-A').catch(githubAction.setFailed);
 
