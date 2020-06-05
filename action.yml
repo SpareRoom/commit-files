@@ -7,24 +7,12 @@ inputs:
   commit_message:
     description: Commit message against the commit
     required: true
-  branch:
-    description: Branch to commit the file changes to
+  github_username:
+    description: GitHub username to commit via
     required: true
-  repository:
-    description: Pepository to commit the file changes to
-    required: false
-    default: '.'
-  commit_user_name:
-    description: Name used for the commit user
-    required: false
-    default: GitHub Actions
-  commit_user_email:
-    description: Email address used for the commit user
-    required: false
-    default: actions@github.com
-  debug:
-    description: To return logs
-    required: false
+  github_token:
+    description: GitHub token to authenticate the push
+    required: true
 
 outputs:
   changes_commited:

@@ -437,56 +437,71 @@ exports.getState = getState;
 
 const cmdExecutor = __webpack_require__(328);
 const githubAction = __webpack_require__(470);
+
 const gitClient = cmdExecutor.git;
 
+const getBranch = async () => {
+  const githubRef = process.env.GITHUB_REF;
+
+  if (githubRef.search(/refs\/heads\//g) !== -1) {
+    return githubRef.replace('refs/heads/', '');
+  }
+  throw new Error('Unable to retrieve branch name to commit to');
+};
+
 const commitFiles = async () => {
-  const activeChanges = await hasActiveChanges();
+  const commitMessage = githubAction.getInput('commit_message');
+  const githubToken = githubAction.getInput('github_token');
+  const githubUsername = githubAction.getInput('github_username');
 
-  const commitMessage = githubAction.getInput("commit_message");
-  const gitBranch = githubAction.getInput("branch");
-  const debug = githubAction.getInput("debug");
+  const gitBranch = await getBranch().catch(githubAction.setFailed);
+  const activeChanges = await gitClient.status('--porcelain');
 
-  if (debug) console.log(`Checking out to '${gitBranch}'`)
-  if (debug) console.log(`Working directory: ${await cmdExecutor.pwd()}`);
-  if (debug) console.log(`Current directory tree: ${await cmdExecutor.ls("-la")}`);
-  if (debug) console.log(
-    `Current branch: ${await gitClient["rev-parse"](
-        "--abbrev-ref HEAD"
-    )}`
-  );
+  const githubRepo = process.env.GITHUB_REPOSITORY;
 
-  if (gitBranch) {
-    await gitClient.fetch();
-    await gitClient.checkout(`origin/${gitBranch}`);
+  // Skip step if no changes.
+  if (!activeChanges) {
+    githubAction.warning('No changes were found');
+    process.exit(0); // Exit with success
   }
 
-  if (activeChanges) {
-    if (!(await hasActiveChanges(1))) await gitClient.add("-A"); // Add all unstaged files if the changes aren't staged
+  await gitClient
+    .remote(
+      `set-url origin https://${githubUsername}:${githubToken}@github.com/${githubRepo}.git`,
+    )
+    .catch(githubAction.setFailed);
 
-    await gitClient.commit(`-a -m ${commitMessage}`);
-    await gitClient.push("-u");
-  } else {
-    githubAction.setOutput(
-      "changes_commited",
-      "No changes to be commited"
-    );
-    return false;
+  // Debug info to confirm it's all working correctly
+  if (githubAction.isDebug()) {
+    githubAction.debug(`Current branch: ${
+      await gitClient['rev-parse']('--abbrev-ref HEAD')
+    }`);
   }
-}
 
-const hasActiveChanges = async (staged = 0) => {
-  let commandArguments = '--quiet --ignore-submodules HEAD 2>/dev/null; echo $?';
+  await gitClient.add('-A').catch(githubAction.setFailed);
 
-  if (staged) commandArguments = "--cached " + commandArguments;
+  await gitClient
+    .config(`--global user.name "${githubUsername}"`)
+    .catch(githubAction.setFailed);
 
-  const changes = await gitClient["diff"](commandArguments);
+  await gitClient
+    .config('--global user.email "<>"')
+    .catch(githubAction.setFailed);
 
-  return changes.trim() != 1 ? false : true
-}
+  await gitClient
+    .commit(`-m "${commitMessage}"`)
+    .catch(githubAction.setFailed);
+
+  await gitClient
+    .push(`--set-upstream origin ${gitBranch}`)
+    .catch(githubAction.setFailed);
+
+  process.exit(0); // Exit with success
+};
 
 module.exports = {
-  commitFiles
-}
+  commitFiles,
+};
 
 
 /***/ }),
