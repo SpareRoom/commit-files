@@ -462,7 +462,7 @@ const commitFiles = async () => {
   // Skip step if no changes.
   if (!activeChanges) {
     githubAction.warning('No changes were found');
-    process.exit(1); // Exit with success
+    process.exit(0); // Exit with success
   }
 
   await gitClient
@@ -496,7 +496,7 @@ const commitFiles = async () => {
     .push(`--set-upstream origin ${gitBranch}`)
     .catch(githubAction.setFailed);
 
-  process.exit(1); // Exit with success
+  process.exit(0); // Exit with success
 };
 
 module.exports = {
