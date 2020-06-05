@@ -460,8 +460,10 @@ const commitFiles = async () => {
   const githubRepo = process.env.GITHUB_REPOSITORY;
 
   // Skip step if no changes.
-  console.log(activeChanges);
-  if (!activeChanges) return process.exit(78);
+  if (!activeChanges) {
+    githubAction.warning('No changes were found');
+    process.exit(1); // Exit with success
+  }
 
   await gitClient
     .remote(
@@ -478,8 +480,13 @@ const commitFiles = async () => {
 
   await gitClient.add('-A').catch(githubAction.setFailed);
 
-  await gitClient.config(`--global user.name "${githubUsername}"`);
-  await gitClient.config('--global user.email "<>"');
+  await gitClient
+    .config(`--global user.name "${githubUsername}"`)
+    .catch(githubAction.setFailed);
+
+  await gitClient
+    .config('--global user.email "<>"')
+    .catch(githubAction.setFailed);
 
   await gitClient
     .commit(`-m "${commitMessage}"`)
@@ -488,6 +495,8 @@ const commitFiles = async () => {
   await gitClient
     .push(`--set-upstream origin ${gitBranch}`)
     .catch(githubAction.setFailed);
+
+  process.exit(1); // Exit with success
 };
 
 module.exports = {
