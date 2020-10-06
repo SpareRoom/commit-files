@@ -471,6 +471,8 @@ const commitFiles = async () => {
     )
     .catch(githubAction.setFailed);
 
+  await gitClient.pull.catch(githubAction.setFailed);
+
   // Debug info to confirm it's all working correctly
   if (githubAction.isDebug()) {
     githubAction.debug(`Current branch: ${
