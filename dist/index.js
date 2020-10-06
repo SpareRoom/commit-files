@@ -443,9 +443,14 @@ const gitClient = cmdExecutor.git;
 const getBranch = async () => {
   const githubRef = process.env.GITHUB_REF;
 
+  if (!githubRef) {
+    throw new Error('No GITHUB_REF is set');
+  }
+
   if (githubRef.search(/refs\/heads\//g) !== -1) {
     return githubRef.replace('refs/heads/', '');
   }
+
   throw new Error('Unable to retrieve branch name to commit to');
 };
 
@@ -471,7 +476,7 @@ const commitFiles = async () => {
     )
     .catch(githubAction.setFailed);
 
-  await gitClient.pull.catch(githubAction.setFailed);
+  await gitClient.pull().catch(githubAction.setFailed);
 
   // Debug info to confirm it's all working correctly
   if (githubAction.isDebug()) {
