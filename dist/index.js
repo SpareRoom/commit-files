@@ -458,11 +458,20 @@ const commitFiles = async () => {
   const commitMessage = githubAction.getInput('commit_message');
   const githubToken = githubAction.getInput('github_token');
   const githubUsername = githubAction.getInput('github_username');
+  const forcedFileString = githubAction.getInput('forced_files');
 
   const gitBranch = await getBranch().catch(githubAction.setFailed);
   const activeChanges = await gitClient.status('--porcelain');
 
   const githubRepo = process.env.GITHUB_REPOSITORY;
+
+  if (forcedFileString) {
+    const forcedFiles = forcedFileString.split(',');
+
+    forcedFiles.forEach(async (element) => {
+      await gitClient.add(`--force ${element}`).catch(githubAction.setFailed);
+    });
+  }
 
   // Skip step if no changes.
   if (!activeChanges) {
