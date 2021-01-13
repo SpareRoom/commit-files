@@ -13,6 +13,9 @@ inputs:
   github_token:
     description: GitHub token to authenticate the push
     required: true
+  forced_files:
+    description: Files to force push up to a repository
+    required: false
 
 outputs:
   changes_commited:
