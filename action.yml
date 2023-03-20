@@ -18,11 +18,11 @@ inputs:
     required: false
 
 outputs:
-  changes_commited:
-    description: The changes in the action that were commited
+  changes_committed:
+    description: The changes in the action that were committed
 
 runs:
-  using: 'node12'
+  using: node16
   main: 'dist/index.js'
 
 branding:
