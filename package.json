@@ -33,5 +33,8 @@
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
     "husky": "^4.2.5"
+  },
+  "allowScripts": {
+    "husky@4.2.5": true
   }
 }
