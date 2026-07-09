@@ -1,111 +1,98 @@
-module.exports =
-/******/ (function(modules, runtime) { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/
-/******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
-/******/ 			exports: {}
-/******/ 		};
-/******/
-/******/ 		// Execute the module function
-/******/ 		var threw = true;
-/******/ 		try {
-/******/ 			modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/ 			threw = false;
-/******/ 		} finally {
-/******/ 			if(threw) delete installedModules[moduleId];
-/******/ 		}
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/
-/******/
-/******/ 	__webpack_require__.ab = __dirname + "/";
-/******/
-/******/ 	// the startup function
-/******/ 	function startup() {
-/******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(104);
-/******/ 	};
-/******/
-/******/ 	// run startup
-/******/ 	return startup();
-/******/ })
-/************************************************************************/
-/******/ ({
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
 
-/***/ 87:
-/***/ (function(module) {
+/***/ 188:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-module.exports = require("os");
+const cmdExecutor = __nccwpck_require__(930);
+const githubAction = __nccwpck_require__(484);
 
-/***/ }),
+const gitClient = cmdExecutor.git;
 
-/***/ 104:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+const getBranch = async () => {
+  const githubRef = process.env.GITHUB_REF;
 
-__webpack_require__(526).commitFiles();
-
-
-/***/ }),
-
-/***/ 129:
-/***/ (function(module) {
-
-module.exports = require("child_process");
-
-/***/ }),
-
-/***/ 233:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-var exec = __webpack_require__(129).exec
-
-module.exports = function (cmd) {
-  return new Promise(function (resolve, reject) {
-    exec(cmd, function (err, stdout, stderr) {
-      if (err) return reject(err)
-      resolve(stdout || stderr)
-    })
-  })
-}
-
-/***/ }),
-
-/***/ 328:
-/***/ (function(module, __unusedexports, __webpack_require__) {
-
-const exec = __webpack_require__(233)
-
-const makeProxy = (o = {}, stack = []) => new Proxy(o, {
-  get (_, k) {
-    return makeProxy((...args) => {
-      return exec([].concat(stack, k, args).join(' '))
-    }, [].concat(stack, k))
+  if (!githubRef) {
+    throw new Error('No GITHUB_REF is set');
   }
-})
 
-module.exports = makeProxy()
+  if (githubRef.search(/refs\/heads\//g) !== -1) {
+    return githubRef.replace('refs/heads/', '');
+  }
+
+  throw new Error('Unable to retrieve branch name to commit to');
+};
+
+const commitFiles = async () => {
+  const commitMessage = githubAction.getInput('commit_message');
+  const githubToken = githubAction.getInput('github_token');
+  const githubUsername = githubAction.getInput('github_username');
+  const forcedFileString = githubAction.getInput('forced_files');
+
+  const gitBranch = await getBranch().catch(githubAction.setFailed);
+  const activeChanges = await gitClient.status('--porcelain');
+
+  const githubRepo = process.env.GITHUB_REPOSITORY;
+
+  if (forcedFileString) {
+    const forcedFiles = forcedFileString.split(',');
+
+    forcedFiles.forEach(async (element) => {
+      await gitClient.add(`--force ${element}`).catch(githubAction.setFailed);
+    });
+  }
+
+  // Skip step if no changes.
+  if (!activeChanges) {
+    githubAction.warning('No changes were found');
+    process.exit(0); // Exit with success
+  }
+
+  await gitClient
+    .remote(
+      `set-url origin https://${githubUsername}:${githubToken}@github.com/${githubRepo}.git`,
+    )
+    .catch(githubAction.setFailed);
+
+  await gitClient.pull(`origin ${gitBranch}`).catch(githubAction.setFailed);
+
+  // Debug info to confirm it's all working correctly
+  if (githubAction.isDebug()) {
+    githubAction.debug(`Current branch: ${
+      await gitClient['rev-parse']('--abbrev-ref HEAD')
+    }`);
+  }
+
+  await gitClient.add('-A').catch(githubAction.setFailed);
+
+  await gitClient
+    .config(`--global user.name "${githubUsername}"`)
+    .catch(githubAction.setFailed);
+
+  await gitClient
+    .config('--global user.email "<>"')
+    .catch(githubAction.setFailed);
+
+  await gitClient
+    .commit(`-m "${commitMessage}"`)
+    .catch(githubAction.setFailed);
+
+  await gitClient
+    .push(`--set-upstream origin ${gitBranch}`)
+    .catch(githubAction.setFailed);
+
+  process.exit(0); // Exit with success
+};
+
+module.exports = {
+  commitFiles,
+};
+
 
 /***/ }),
 
-/***/ 431:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 914:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -116,8 +103,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const os = __importStar(__webpack_require__(87));
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const os = __importStar(__nccwpck_require__(857));
 /**
  * Commands
  *
@@ -203,8 +190,8 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 470:
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
+/***/ 484:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
@@ -224,10 +211,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const command_1 = __webpack_require__(431);
-const os = __importStar(__webpack_require__(87));
-const path = __importStar(__webpack_require__(622));
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const command_1 = __nccwpck_require__(914);
+const os = __importStar(__nccwpck_require__(857));
+const path = __importStar(__nccwpck_require__(928));
 /**
  * The code to exit an action
  */
@@ -432,101 +419,104 @@ exports.getState = getState;
 
 /***/ }),
 
-/***/ 526:
-/***/ (function(module, __unusedexports, __webpack_require__) {
+/***/ 930:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const cmdExecutor = __webpack_require__(328);
-const githubAction = __webpack_require__(470);
+const exec = __nccwpck_require__(700)
 
-const gitClient = cmdExecutor.git;
-
-const getBranch = async () => {
-  const githubRef = process.env.GITHUB_REF;
-
-  if (!githubRef) {
-    throw new Error('No GITHUB_REF is set');
+const makeProxy = (o = {}, stack = []) => new Proxy(o, {
+  get (_, k) {
+    return makeProxy((...args) => {
+      return exec([].concat(stack, k, args).join(' '))
+    }, [].concat(stack, k))
   }
+})
 
-  if (githubRef.search(/refs\/heads\//g) !== -1) {
-    return githubRef.replace('refs/heads/', '');
-  }
-
-  throw new Error('Unable to retrieve branch name to commit to');
-};
-
-const commitFiles = async () => {
-  const commitMessage = githubAction.getInput('commit_message');
-  const githubToken = githubAction.getInput('github_token');
-  const githubUsername = githubAction.getInput('github_username');
-  const forcedFileString = githubAction.getInput('forced_files');
-
-  const gitBranch = await getBranch().catch(githubAction.setFailed);
-  const activeChanges = await gitClient.status('--porcelain');
-
-  const githubRepo = process.env.GITHUB_REPOSITORY;
-
-  if (forcedFileString) {
-    const forcedFiles = forcedFileString.split(',');
-
-    forcedFiles.forEach(async (element) => {
-      await gitClient.add(`--force ${element}`).catch(githubAction.setFailed);
-    });
-  }
-
-  // Skip step if no changes.
-  if (!activeChanges) {
-    githubAction.warning('No changes were found');
-    process.exit(0); // Exit with success
-  }
-
-  await gitClient
-    .remote(
-      `set-url origin https://${githubUsername}:${githubToken}@github.com/${githubRepo}.git`,
-    )
-    .catch(githubAction.setFailed);
-
-  await gitClient.pull(`origin ${gitBranch}`).catch(githubAction.setFailed);
-
-  // Debug info to confirm it's all working correctly
-  if (githubAction.isDebug()) {
-    githubAction.debug(`Current branch: ${
-      await gitClient['rev-parse']('--abbrev-ref HEAD')
-    }`);
-  }
-
-  await gitClient.add('-A').catch(githubAction.setFailed);
-
-  await gitClient
-    .config(`--global user.name "${githubUsername}"`)
-    .catch(githubAction.setFailed);
-
-  await gitClient
-    .config('--global user.email "<>"')
-    .catch(githubAction.setFailed);
-
-  await gitClient
-    .commit(`-m "${commitMessage}"`)
-    .catch(githubAction.setFailed);
-
-  await gitClient
-    .push(`--set-upstream origin ${gitBranch}`)
-    .catch(githubAction.setFailed);
-
-  process.exit(0); // Exit with success
-};
-
-module.exports = {
-  commitFiles,
-};
-
+module.exports = makeProxy()
 
 /***/ }),
 
-/***/ 622:
-/***/ (function(module) {
+/***/ 700:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+var exec = (__nccwpck_require__(317).exec)
+
+module.exports = function (cmd) {
+  return new Promise(function (resolve, reject) {
+    exec(cmd, function (err, stdout, stderr) {
+      if (err) return reject(err)
+      resolve(stdout || stderr)
+    })
+  })
+}
+
+/***/ }),
+
+/***/ 317:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("child_process");
+
+/***/ }),
+
+/***/ 857:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("os");
+
+/***/ }),
+
+/***/ 928:
+/***/ ((module) => {
+
+"use strict";
 module.exports = require("path");
 
 /***/ })
 
-/******/ });
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __nccwpck_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		var threw = true;
+/******/ 		try {
+/******/ 			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __nccwpck_require__);
+/******/ 			threw = false;
+/******/ 		} finally {
+/******/ 			if(threw) delete __webpack_module_cache__[moduleId];
+/******/ 		}
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/compat */
+/******/ 	
+/******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/************************************************************************/
+var __webpack_exports__ = {};
+(__nccwpck_require__(188).commitFiles)();
+
+module.exports = __webpack_exports__;
+/******/ })()
+;
